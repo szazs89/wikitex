@@ -78,14 +78,15 @@ CRON = -e "s@\%DECRUFT\%@${DECRUFT}@g; s@\%DATABASE\%@${DATABASE}@g; s@\%DBUSER\
 QUOTA = -e "s@\%PARTITION\%@${PARTITION}@g;"
 AUDIT = ${SUDO} ${CRON} ${QUOTA}
 EXEC = chmod a+x
-DOCS = README NEWS COPYING MANIFEST THANKS Wikitex.php WikitexConstants.php main.php wikitex.ini
+DOCS = README NEWS COPYING MANIFEST THANKS
+PHPS = Wikitex.php WikitexConstants.php main.php wikitex.ini
 PROGS = wikitex.sudoers wikitex.cron wikitex-decruft.sh wikitex-audit.sh wikitex-texmf
 
 all: docs progs
 
 docs: ${DOCS}
 
-progs: ${PROGS}
+progs: ${PHPS} ${PROGS}
 
 README: readme.ms
 	${SED} ${?} ${GROFF} ${@}
@@ -151,6 +152,6 @@ clean-docs:
 	rm -frv ${DOCS}
 
 clean-progs:
-	rm -frv ${PROGS}
+	rm -frv ${PROGS} ${PHPS}
 
 clean: clean-progs
