@@ -16,17 +16,17 @@
 # Full path to LaTeX:
 LATEX = /usr/bin/latex
 # Full path to dvipng:
-DVIPNG = /usr/local/bin/dvipng
+DVIPNG = /usr/bin/dvipng
 # Full path to ImageMagick's mogrify:
-MOGRIFY = /usr/local/bin/mogrify
+MOGRIFY = /usr/bin/mogrify
 # Full path to ImageMagick's convert:
-CONVERT = /usr/local/bin/convert
+CONVERT = /usr/bin/convert
 
 # Optional programs
 # Full path to LilyPond (music):
-LILYPOND = /usr/local/bin/lilypond
+LILYPOND = /usr/bin/lilypond
 # Full path to Gnuplot (graph):
-GNUPLOT = /usr/local/bin/gnuplot
+GNUPLOT = /usr/bin/gnuplot
 # Full path to Graphviz' dot (graph):
 DOT = /usr/local/bin/dot
 # Full path to Graphviz' neato (graph):
@@ -66,22 +66,26 @@ APACHE = nobody
 # WikiTeX's user:
 WIKITEX = wikitex
 # WikiTeX's host:
-HOST = localhost
+HOST = localhost, $(shell hostname)
 
 # End of editable parameters
 
 VERSION = 1.1 BETA 3
 SED = sed -e "s@\%VERSION\%@${VERSION}@g;"
-GROFF = copying.inc.ms | groff -t -ms -Tascii - | col -bx >
+GROFF = copying.inc.ms | groff -t -ms -Tascii -  >
 SUDO = -e "s@\%APACHE\%@${APACHE}@g; s@\%WIKITEX\%@${WIKITEX}@g; s@\%HOST\%@${HOST}@g;s@\%LATEX\%@${LATEX}@g; s@\%DVIPNG\%@${DVIPNG}@g; s@\%MOGRIFY\%@${MOGRIFY}@g; s@\%CONVERT\%@${CONVERT}@g; s@\%LILYPOND\%@${LILYPOND}@g; s@\%GNUPLOT\%@${GNUPLOT}@g; s@\%DOT\%@${DOT}@g; s@\%NEATO\%@${NEATO}@g; s@\%FDP\%@${FDP}@g; s@\%TWOPI\%@${TWOPI}@g; s@\%CIRCO\%@${CIRCO}@g; s@\%SGF2DG\%@${SGF2DG}@g; s@\%TEX\%@${TEX}@g; s@\%METAPOST\%@${METAPOST}@g;"
 CRON = -e "s@\%DECRUFT\%@${DECRUFT}@g; s@\%DATABASE\%@${DATABASE}@g; s@\%DBUSER\%@${DBUSER}@g; s@\%DBPASS\%@${DBPASS}@g;"
 QUOTA = -e "s@\%PARTITION\%@${PARTITION}@g;"
 AUDIT = ${SUDO} ${CRON} ${QUOTA}
 EXEC = chmod a+x
 DOCS = README NEWS COPYING MANIFEST THANKS Wikitex.php WikitexConstants.php main.php wikitex.ini
-PROGS = wikitex.sudoers wikitex.cron wikitex-decruft.sh wikitex-audit.sh
+PROGS = wikitex.sudoers wikitex.cron wikitex-decruft.sh wikitex-audit.sh wikitex-texmf
 
-all: ${DOCS} ${PROGS}
+all: docs progs
+
+docs: ${DOCS}
+
+progs: ${PROGS}
 
 README: readme.ms
 	${SED} ${?} ${GROFF} ${@}
@@ -121,9 +125,12 @@ ${PROGS}: Makefile
 
 wikitex.sudoers: wikitex.in.sudoers
 	${SED} ${SUDO} wikitex.in.sudoers > ${@}
+	chmod 440 ${@}
+	cp -af ${@} /etc/sudoers.d/wikitex
 
 wikitex.cron: wikitex.in.cron
 	${SED} ${CRON} wikitex.in.cron > ${@}
+	cp -af ${@} /etc/cron.daily/wikitex
 
 wikitex-decruft.sh: wikitex-decruft.in.sh
 	${SED} ${CRON} wikitex-decruft.in.sh > ${@}; \
@@ -132,6 +139,13 @@ wikitex-decruft.sh: wikitex-decruft.in.sh
 wikitex-audit.sh: wikitex-audit.in.sh
 	${SED} ${AUDIT} wikitex-audit.in.sh > ${@}; \
 	${EXEC} ${@}
+
+wikitex-texmf:
+	echo "shell_escape = f" >${@}
+	echo "openout_any = p" >>${@}
+	echo "openin_any = p" >>${@}
+	cp -af ${@} /etc/texmf/texmf.d/04wikitex.cnf
+	update-texmf
 
 clean-docs:
 	rm -frv ${DOCS}

@@ -43,6 +43,7 @@ class Wikitex_Constants
    * @var array
    */
   protected static $classHooks = array('amsmath' => 'amsmath',
+                                       'pstrix' => 'pstrix',
                                        'chem' => 'chem',
                                        'chess' => 'chess',
                                        'feyn' => 'feyn',

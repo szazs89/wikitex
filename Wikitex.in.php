@@ -396,6 +396,20 @@ class Wikitex {
   }
 
   /**
+   * PStricks.
+   * 
+   * {@link http://www.ams.org/tex/amslatex.html AMS-LaTeX}, including commutative diagrams.
+   * @param string $content containing the tag's content, received from wgParser.
+   * @param array $parms of parameters corresponding to the tag's properties.
+   * @return string containing the processed tag, referencing novel
+   * content.
+   */
+  public static function pstrix($content, array $parms)
+  {
+    return self::renderContent($content, __FUNCTION__, $parms);
+  }
+
+  /**
    * Lilypond.
    * 
    * {@link http://www.lilypond.org/web/ Lilypond} with midi output.
